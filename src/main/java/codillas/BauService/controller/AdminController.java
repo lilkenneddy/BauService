@@ -15,7 +15,7 @@ public class AdminController {
     @GetMapping
     public ResponseEntity<List<AdminDetailsDto>> getAdmins() {
         List<AdminDetailsDto> adminsDto = new ArrayList<>();
-        AdminDetailsDto rostik = new AdminDetailsDto("Rostik", "Skliaruk", "sklarukrostislav@gmail.com", "380983460703","EMPLOYEE", "ACTIVE");
+        AdminDetailsDto rostik = new AdminDetailsDto("Rostik", "Skliaruk", "sklarukrostislav@gmail.com", "380983460703", "EMPLOYEE", "ACTIVE");
         return new ResponseEntity<>(adminsDto, HttpStatus.OK);
     }
 
