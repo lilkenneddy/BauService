@@ -1,0 +1,627 @@
+openapi: 3.0.3
+info:
+  title: Construction Project API
+  version: 1.1.0
+  description: API для управління клієнтами, замовленнями, фотографіями, користувачами та ролями.
+
+servers:
+  - url: http://localhost:8080
+
+tags:
+  - name: auth
+    description: Авторизація та реєстрація
+  - name: clients
+    description: Операції з клієнтами
+  - name: orders
+    description: Операції з замовленнями
+  - name: photos
+    description: Операції з фотографіями
+  - name: users
+    description: Управління користувачами
+  - name: roles
+    description: Управління ролями
+  - name: admin
+    description: Адміністративні операції (логи, статистика)
+
+security:
+  - bearerAuth: []
+
+paths:
+  /auth/login:
+    post:
+      tags: [auth]
+      summary: Увійти в систему
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [username, password]
+              properties:
+                username:
+                  type: string
+                password:
+                  type: string
+      responses:
+        '200':
+          description: Успішна авторизація
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  token:
+                    type: string
+                  role:
+                    $ref: '#/components/schemas/Role'
+
+  /auth/register:
+    post:
+      tags: [auth]
+      summary: Зареєструвати нового користувача
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [username, password]
+              properties:
+                username:
+                  type: string
+                password:
+                  type: string
+      responses:
+        '201':
+          description: Користувача зареєстровано
+
+  # CLIENTS
+  /clients:
+    get:
+      summary: Отримати список клієнтів
+      tags: [clients]
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Список клієнтів
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ClientInput'
+    post:
+      summary: Створити нового клієнта
+      tags: [clients]
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ClientInput'
+      responses:
+        '201':
+          description: Клієнта створено
+
+  /clients/{id}:
+    get:
+      summary: Отримати клієнта за ID
+      tags: [clients]
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Клієнт
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ClientInput'
+        '404':
+          description: Не знайдено
+    put:
+      summary: Оновити клієнта
+      tags: [clients]
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ClientInput'
+      responses:
+        '200':
+          description: Клієнта оновлено
+        '404':
+          description: Не знайдено
+    delete:
+      summary: Видалити клієнта
+      tags: [clients]
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '204':
+          description: Клієнта видалено
+        '404':
+          description: Не знайдено
+
+  # ORDERS
+  /orders:
+    get:
+      summary: Отримати список замовлень
+      tags: [orders]
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Список замовлень
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/OrderInput'
+    post:
+      summary: Створити нове замовлення
+      tags: [orders]
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/OrderInput'
+      responses:
+        '201':
+          description: Замовлення створено
+
+  /orders/{id}:
+    get:
+      summary: Отримати замовлення за ID
+      tags: [orders]
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Замовлення
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OrderInput'
+        '404':
+          description: Не знайдено
+    put:
+      summary: Оновити замовлення
+      tags: [orders]
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/OrderInput'
+      responses:
+        '200':
+          description: Замовлення оновлено
+        '404':
+          description: Не знайдено
+    delete:
+      summary: Видалити замовлення
+      tags: [orders]
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '204':
+          description: Замовлення видалено
+        '404':
+          description: Не знайдено
+
+  # PHOTOS
+  /photos:
+    get:
+      summary: Отримати список фото
+      tags: [photos]
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Список фото
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/PhotoOutput'
+    post:
+      summary: Додати фото до замовлення
+      tags: [photos]
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required:
+                - file
+                - title
+                - order_id
+              properties:
+                file:
+                  type: string
+                  format: binary
+                  description: Фотофайл (jpeg/png)
+                title:
+                  type: string
+                type:
+                  type: string
+                order_id:
+                  type: string
+                  format: uuid
+      responses:
+        '201':
+          description: Фото додано
+
+  /photos/{id}:
+    get:
+      summary: Отримати фото за ID
+      tags: [photos]
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Фото
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PhotoOutput'
+        '404':
+          description: Не знайдено
+    put:
+      summary: Оновити інформацію про фото
+      tags: [photos]
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                title:
+                  type: string
+                type:
+                  type: string
+      responses:
+        '200':
+          description: Фото оновлено
+        '404':
+          description: Не знайдено
+    delete:
+      summary: Видалити фото
+      tags: [photos]
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '204':
+          description: Фото видалено
+        '404':
+          description: Не знайдено
+
+  # USERS
+  /users:
+    get:
+      summary: Отримати список користувачів
+      tags: [users]
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Список користувачів
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/UserOutput'
+    post:
+      summary: Створити користувача
+      tags: [users]
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserInput'
+      responses:
+        '201':
+          description: Користувача створено
+
+  /users/{id}:
+    get:
+      summary: Отримати користувача за ID
+      tags: [users]
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Користувач
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserOutput'
+        '404':
+          description: Не знайдено
+    put:
+      summary: Оновити користувача
+      tags: [users]
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserInput'
+      responses:
+        '200':
+          description: Користувача оновлено
+        '404':
+          description: Не знайдено
+    delete:
+      summary: Видалити користувача
+      tags: [users]
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '204':
+          description: Користувача видалено
+        '404':
+          description: Не знайдено
+
+  # ROLES
+  /roles:
+    get:
+      summary: Отримати всі ролі
+      tags: [roles]
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Список ролей
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Role'
+    post:
+      summary: Створити роль
+      tags: [roles]
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Role'
+      responses:
+        '201':
+          description: Роль створена
+
+  /roles/{roleName}:
+    put:
+      summary: Оновити роль за назвою
+      tags: [roles]
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: roleName
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Role'
+      responses:
+        '200':
+          description: Роль оновлена
+        '404':
+          description: Не знайдено
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  schemas:
+    Role:
+      type: object
+      properties:
+        name:
+          type: string
+        description:
+          type: string
+
+    UserInput:
+      type: object
+      required:
+        - username
+        - password
+      properties:
+        username:
+          type: string
+        password:
+          type: string
+        email:
+          type: string
+          format: email
+        role:
+          $ref: '#/components/schemas/Role'
+
+    UserOutput:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        username:
+          type: string
+        email:
+          type: string
+          format: email
+        role:
+          $ref: '#/components/schemas/Role'
+
+    ClientInput:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        phone:
+          type: string
+        email:
+          type: string
+          format: email
+        address:
+          type: string
+
+    OrderInput:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        client_id:
+          type: string
+          format: uuid
+        description:
+          type: string
+        status:
+          type: string
+          enum:
+            - new
+            - in_progress
+            - done
+            - canceled
+
+    PhotoOutput:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        title:
+          type: string
+        url:
+          type: string
+          format: uri
+        order_id:
+          type: string
+          format: uuid
+        type:
+          type: string
