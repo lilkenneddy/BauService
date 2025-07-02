@@ -2,32 +2,49 @@ package codillas.BauService.controller;
 
 import codillas.BauService.dto.AdminDetailsDto;
 import codillas.BauService.dto.AdminUpdateDto;
+import codillas.BauService.dto.AdminRegistrationDto;
+import codillas.BauService.service.AdminService;
+import codillas.BauService.mapper.AdminMapper;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.ArrayList;
 import java.util.List;
 
-@RestController("/admins")
+@RestController
+@RequestMapping("/admins")
+@RequiredArgsConstructor
 public class AdminController {
+
+    private final AdminService adminService;
+    private final AdminMapper adminMapper;
 
     @GetMapping
     public ResponseEntity<List<AdminDetailsDto>> getAdmins() {
-        List<AdminDetailsDto> adminsDto = new ArrayList<>();
-        AdminDetailsDto rostik = new AdminDetailsDto("Rostik", "Skliaruk", "sklarukrostislav@gmail.com", "380983460703","EMPLOYEE", "ACTIVE");
-        return new ResponseEntity<>(adminsDto, HttpStatus.OK);
+        List<AdminDetailsDto> adminDetailsDtoList =
+                adminService.getAllAdmins().stream().map(adminMapper::toAdminDetailsDto).toList();
+
+        return ResponseEntity.ok(adminDetailsDtoList);
+    }
+
+    @GetMapping("/{id}")
+    public <Admin> ResponseEntity<AdminDetailsDto> getAdmin(@PathVariable String id) {
+        Admin admin = (Admin) adminService.getAdmin(id);
+        AdminDetailsDto adminDetailsDto = adminMapper.toAdminDetailsDto((codillas.BauService.service.domain.Admin) admin);
+        return ResponseEntity.ok(adminDetailsDto);
     }
 
     @PostMapping
-    public ResponseEntity<Void> createAdmin(@RequestBody AdminDetailsDto adminDetailsDto) {
-        return new ResponseEntity<>(HttpStatus.CREATED);
+    public ResponseEntity<Void> createAdmin(@RequestBody AdminRegistrationDto adminRegistrationDto) {
+        adminService.createAdmin(adminMapper.toAdmin(adminRegistrationDto));
+        return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 
-    @PutMapping
-    public ResponseEntity<Void> updateAdmin(@RequestBody AdminUpdateDto adminUpdateDto) {
-        return new ResponseEntity<>(HttpStatus.OK);
+    @PutMapping("/{id}")
+    public ResponseEntity<Void> updateAdmin(@PathVariable String id,
+                                            @RequestBody AdminUpdateDto adminUpdateDto) {
+        adminService.updateAdmin(id, adminMapper.toAdmin(adminUpdateDto));
+        return ResponseEntity.ok().build();
     }
-
-
 }
